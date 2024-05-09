@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    restart: unless-stopped
+    environment:
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+    volumes:
+      - synapse_files:/data
+    ports:
+      - 32000:8008
+    links:
+      - "messenger_bridge:messenger-bridge"
+      - "whatsapp_bridge:whatsapp-bridge"
+      - "discord_bridge:discord-bridge"
+
+
+  synapse_admin:
+    image: awesometechnologies/synapse-admin:latest
+    restart: unless-stopped
+    ports:
+      - 32001:80
+
+  riot:
+    image: vectorim/riot-web:latest
+    restart: unless-stopped
+    volumes:
+      - riot_files:/app
+    ports:
+      - 32002:80
+
+
+  messenger_bridge:
+    image: dock.mau.dev/tulir/mautrix-facebook:latest
+    restart: unless-stopped
+    volumes:
+      - messenger_bridge_files:/data
+
+  whatsapp_bridge:
+    image: dock.mau.dev/tulir/mautrix-whatsapp:latest
+    restart: unless-stopped
+    volumes:
+      - whatsapp_bridge_files:/data
+
+  discord_bridge:
+    image: sorunome/mx-puppet-discord:latest
+    restart: unless-stopped
+    environment:
+      - CONFIG_PATH=/data/config.yaml
+      - REGISTRATION_PATH=/data/discord-registration.yaml
+    volumes:
+      - discord_bridge_files:/data
+      
+volumes:
+ synapse_files:
+ riot_files:
+ discord_bridge_files:
+ whatsapp_bridge_files:
+ messenger_bridge_files:
