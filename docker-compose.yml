@@ -22,11 +22,11 @@ services:
     ports:
       - 32001:80
 
-  riot:
-    image: vectorim/riot-web:latest
+  element:
+    image: vectorim/element-web:latest
     restart: unless-stopped
     volumes:
-      - riot_files:/app
+      - element_files:/app
     ports:
       - 32002:80
 
@@ -54,7 +54,7 @@ services:
       
 volumes:
  synapse_files:
- riot_files:
+ element_files:
  discord_bridge_files:
  whatsapp_bridge_files:
  messenger_bridge_files:
