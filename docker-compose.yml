@@ -32,13 +32,13 @@ services:
 
 
   messenger_bridge:
-    image: dock.mau.dev/tulir/mautrix-facebook:latest
+    image: dock.mau.dev/mautrix/meta:latest
     restart: unless-stopped
     volumes:
       - messenger_bridge_files:/data
 
   whatsapp_bridge:
-    image: dock.mau.dev/tulir/mautrix-whatsapp:latest
+    image: dock.mau.dev/mautrix/whatsapp:latest
     restart: unless-stopped
     volumes:
       - whatsapp_bridge_files:/data
