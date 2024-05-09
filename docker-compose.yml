@@ -1,6 +1,37 @@
 version: "3"
 
 services:
+  proxy:
+    image: jwilder/nginx-proxy:1.0-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - proxy-tier
+
+  letsencrypt-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion:v1.13.1
+    restart: always
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy-tier
+    depends_on:
+      - proxy
+    environment:
+      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL} # FIXME
+
   synapse:
     image: matrixdotorg/synapse:latest
     restart: unless-stopped
@@ -14,6 +45,10 @@ services:
       - "messenger_bridge:messenger-bridge"
       - "whatsapp_bridge:whatsapp-bridge"
       - "discord_bridge:discord-bridge"
+    environment:
+      VIRTUAL_HOST: ${DEFAULTWEB_HOST0},${DEFAULTWEB_HOST1} # FIXME
+      LETSENCRYPT_HOST: ${DEFAULTWEB_HOST0},${DEFAULTWEB_HOST1}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
 
 
   synapse_admin:
@@ -53,8 +88,15 @@ services:
       - discord_bridge_files:/data
       
 volumes:
- synapse_files:
- element_files:
- discord_bridge_files:
- whatsapp_bridge_files:
- messenger_bridge_files:
+  synapse_files:
+  element_files:
+  discord_bridge_files:
+  whatsapp_bridge_files:
+  messenger_bridge_files:
+  html:
+  certs:
+  vhost.d:
+
+networks:
+  proxy-tier: # This is for proxied containers
+   
