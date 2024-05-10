@@ -1,6 +1,9 @@
 version: "3"
 
 services:
+  # This is the front-end http server which acts as a reverse proxy for containers
+  # on the "proxy-tier" network
+  # https://github.com/nginx-proxy/nginx-proxy
   proxy:
     image: jwilder/nginx-proxy:1.0-alpine
     restart: always
@@ -17,6 +20,10 @@ services:
     networks:
       - proxy-tier
 
+  # This container manages lets-encrypt certificates
+  # for the proxy server
+  # (FIXME I believe this is now renamed nginxproxy/acme-companion, so the container version may need upgrading)
+  # https://github.com/nginx-proxy/acme-companion
   letsencrypt-companion:
     image: jrcs/letsencrypt-nginx-proxy-companion:v1.13.1
     restart: always
