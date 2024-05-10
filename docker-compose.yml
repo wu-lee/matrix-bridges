@@ -97,7 +97,7 @@ services:
       - whatsapp_bridge_files:/data
 
   discord_bridge:
-    image: sorunome/mx-puppet-discord:latest
+    image: registry.gitlab.com/mx-puppet/discord/mx-puppet-discord:latest
     restart: unless-stopped
     environment:
       - CONFIG_PATH=/data/config.yaml
