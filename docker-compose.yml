@@ -30,13 +30,11 @@ services:
     depends_on:
       - proxy
     environment:
-      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL} # FIXME
+      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
 
   synapse:
     image: matrixdotorg/synapse:latest
     restart: unless-stopped
-    environment:
-      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
     volumes:
       - synapse_files:/data
     ports:
@@ -45,17 +43,25 @@ services:
       - "messenger_bridge:messenger-bridge"
       - "whatsapp_bridge:whatsapp-bridge"
       - "discord_bridge:discord-bridge"
+    networks:
+      - proxy-tier
     environment:
-      VIRTUAL_HOST: ${DEFAULTWEB_HOST0},${DEFAULTWEB_HOST1} # FIXME
-      LETSENCRYPT_HOST: ${DEFAULTWEB_HOST0},${DEFAULTWEB_HOST1}
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+      VIRTUAL_HOST: ${MATRIX_DOMAIN}
+      LETSENCRYPT_HOST: ${MATRIX_DOMAIN}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-
 
   synapse_admin:
     image: awesometechnologies/synapse-admin:latest
     restart: unless-stopped
     ports:
       - 32001:80
+    networks:
+      - proxy-tier
+    environment:
+      VIRTUAL_HOST: ${MATRIX_DOMAIN}
+      LETSENCRYPT_HOST: ${MATRIX_DOMAIN}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
 
   element:
     image: vectorim/element-web:latest
@@ -64,7 +70,12 @@ services:
       - element_files:/app
     ports:
       - 32002:80
-
+    networks:
+      - proxy-tier
+    environment:
+      VIRTUAL_HOST: ${ELEMENT_DOMAIN}
+      LETSENCRYPT_HOST: ${ELEMENT_DOMAIN}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
 
   messenger_bridge:
     image: dock.mau.dev/mautrix/meta:latest
